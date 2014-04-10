@@ -29,12 +29,13 @@ end
 
 # libraries/helpers.rb method to DRY directory creation resources
 client_bin = find_chef_client
-node.set['chef_client']['bin'] = client_bin
+node.default['chef_client']['bin'] = client_bin
 create_directories
 
 dist_dir, conf_dir = value_for_platform_family(
   ['debian'] => %w{ debian default },
-  ['rhel'] => %w{ redhat sysconfig }
+  ['rhel'] => %w{ redhat sysconfig },
+  ['fedora'] => %w{ redhat sysconfig }
   )
 
 # let's create the service file so the :disable action doesn't fail
@@ -57,7 +58,7 @@ when 'arch', 'debian', 'rhel', 'fedora', 'suse', 'openbsd', 'freebsd'
     action [:disable, :stop]
   end
 
-when 'openindiana', 'opensolaris', 'nexentacore', 'solaris2', 'smartos'
+when 'openindiana', 'opensolaris', 'nexentacore', 'solaris2', 'smartos', 'omnios'
   service 'chef-client' do
     supports :status => true, :restart => true
     action [:disable, :stop]
@@ -87,6 +88,7 @@ if node['chef_client']['cron']['use_cron_d']
     minute  node['chef_client']['cron']['minute']
     hour    node['chef_client']['cron']['hour']
     path    node['chef_client']['cron']['path'] if node['chef_client']['cron']['path']
+    mailto  node['chef_client']['cron']['mailto'] if node['chef_client']['cron']['mailto']
     user    'root'
     cmd = ''
     cmd << "/bin/sleep #{sleep_time}; " if sleep_time
@@ -102,6 +104,7 @@ else
     minute  node['chef_client']['cron']['minute']
     hour    node['chef_client']['cron']['hour']
     path    node['chef_client']['cron']['path'] if node['chef_client']['cron']['path']
+    mailto  node['chef_client']['cron']['mailto'] if node['chef_client']['cron']['mailto']
     user    'root'
     cmd = ''
     cmd << "/bin/sleep #{sleep_time}; " if sleep_time

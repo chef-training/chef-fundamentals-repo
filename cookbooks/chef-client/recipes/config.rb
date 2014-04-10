@@ -38,7 +38,7 @@ when String
       rotate node['chef_client']['logrotate']['rotate']
       frequency node['chef_client']['logrotate']['frequency']
       options ['compress']
-      postrotate '/etc/init.d/chef-client condrestart >/dev/null || :'
+      postrotate '/etc/init.d/chef-client reload >/dev/null || :'
     end
   end
 else
@@ -60,6 +60,7 @@ node['chef_client']['load_gems'].each do |gem_name, gem_info_hash|
   chef_gem gem_name do
     action gem_info_hash[:action] || :install
     version gem_info_hash[:version] if gem_info_hash[:version]
+    options ( gem_info_hash[:options] ) if gem_info_hash[:options]
   end
   chef_requires.push(gem_info_hash[:require_name] || gem_name)
 end

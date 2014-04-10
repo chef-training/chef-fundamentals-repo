@@ -5,14 +5,21 @@ This cookbook is used to configure a system as a Chef Client.
 
 Requirements
 ------------
-- Chef 0.10.10+
+- Chef 0.10.14+
 - Ohai 0.6.12+
+
+Chef 10.14.0 or greater is recommended to make use of the
+`client_fork`
+[configuration option](http://tickets.opscode.com/browse/CHEF-3104).
 
 ### Platforms
 The following platforms are tested directly under test-kitchen; see .kitchen.yml and TESTING.md for details.
 
-- Ubuntu 10.04, 12.04
-- CentOS 5.9, 6.4
+* Ubuntu 10.04, 12.04
+* CentOS 5.9, 6.4
+* Debian 6.0.7
+* SUSE (SLES) 11-sp2
+* OmniOS r151006c
 
 The following platforms are known to work:
 
@@ -50,7 +57,7 @@ The following attributes affect the behavior of the chef-client program when run
   daemon runs. Default 1800.
 * `node["chef_client"]["splay"]` - Sets `Chef::Config[:splay]` via
   command-line option for a random amount of seconds to add to
-  interval. Default 20.
+  interval. Default 300.
 * `node["chef_client"]["log_dir"]` - Sets directory used in
   `Chef::Config[:log_location]` via command-line option to a location
   where chef-client should log output. Default "/var/log/chef".
@@ -75,6 +82,7 @@ The following attributes affect the behavior of the chef-client program when run
 * `node["chef_client"]["cron"]["use_cron_d"]` - If true, use the
   "cron_d" LWRP (https://github.com/opscode-cookbooks/cron). If false
   (default), use the cron resource built-in to Chef.
+* `node["chef_client"]["cron"]["mailto"]` - If set, `MAILTO` env variable is set for cron definition
 * `node["chef_client"]["daemon_options"]` - An array of additional
   options to pass to the chef-client service, empty by default, and
   must be an array if specified.
@@ -115,7 +123,9 @@ This cookbook makes use of attribute-driven configuration with this attribute. S
 * `node["chef_client"]["load_gems"]` - Hash of gems to load into chef
   via the client.rb file
 * `node["ohai"]["disabled_plugins"]` - An array of ohai plugins to
-  disable, empty by default, and must be an array if specified.
+  disable, empty by default, and must be an array if specified. Ohai 6
+  plugins should be specified as a string (ie. "dmi"). Ohai 7 plugins 
+  should be specified as a symbol within quotation marks (ie. ":Passwd").
 
 ### Deprecated / Replaced
 

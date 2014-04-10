@@ -2,6 +2,59 @@ chef-client Cookbook CHANGELOG
 ==============================
 This file is used to list changes made in each version of the chef-client cookbook.
 
+v3.4.0 (2014-04-09)
+-------------------
+- [COOK-4521] - support Ohai 7 syntax for disabling plugins
+- [COOK-4505] - kill -9 chef-client when stopping vis SMF
+
+
+v3.3.8 (2014-03-18)
+-------------------
+- [COOK-4430] can't rotate chef-client's logs
+
+
+v3.3.6 (2014-03-18)
+-------------------
+- [COOK-4432] Use SSL verification by default when talking to HEC
+
+
+v3.3.4 (2014-03-12)
+-------------------
+- [COOK-4101] - Support ENV['https_proxy']
+
+
+v3.3.3 (2014-02-27)
+-------------------
+[COOK-4338] - chef-client Upstart job starts too early
+
+
+v3.3.2 (2014-02-25)
+-------------------
+Fixing merge conflict in launchd_service
+
+
+v3.3.0 (2014-02-25)
+-------------------
+### Bug
+- **[COOK-4286](https://tickets.opscode.com/browse/COOK-4286)** - Cleanup the Kitchen
+- **[COOK-4242](https://tickets.opscode.com/browse/COOK-4242)** - Add Fedora 19 support to chef-client::cron
+- **[COOK-4151](https://tickets.opscode.com/browse/COOK-4151)** - Runit should set locale
+- **[COOK-4127](https://tickets.opscode.com/browse/COOK-4127)** - add mailto support for cron runs
+- **[COOK-4038](https://tickets.opscode.com/browse/COOK-4038)** - Don't define CHEF_SERVER_USER constant if already defined
+
+### New Feature
+- **[COOK-4169](https://tickets.opscode.com/browse/COOK-4169)** - Add the possibility to specify "options" for the required-gems installation procedure in the chef-client cookbook
+
+### Improvement
+- **[COOK-4159](https://tickets.opscode.com/browse/COOK-4159)** - turn down "Found chef-client in #{client_bin}" messages to :debug level
+- **[COOK-3896](https://tickets.opscode.com/browse/COOK-3896)** - launchd_service recipe should use Gem::Requirement instead of Chef::VersionConstraint
+
+
+v3.2.2 (2014-01-26)
+-------------------
+[COOK-4092] Add KeepAlive so that launchd will "daemonize" chef-client
+
+
 v3.2.0
 ------
 ### Bug
