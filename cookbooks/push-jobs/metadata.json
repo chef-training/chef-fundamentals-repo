@@ -1,0 +1,107 @@
+{
+  "name": "push-jobs",
+  "description": "Installs the Chef Push Jobs Client",
+  "long_description": "# push-jobs cookbook\n\nInstalls the Chef Push Jobs client package and sets it up to run as\na service.\n\nThe official documentation is on\n[docs.getchef.com](http://docs.opscode.com/push_jobs.html)\n\n# Requirements\n\nRequires Enterprise Chef with the Push\nJobs feature.\n\n* Chef: 11.4.0 or higher\n* runit cookbook\n* windows cookbook\n\n## Platform\n\n* Debian\n* Ubuntu\n* Windows\n\nTested on Ubuntu 10.04, 12.04, CentOS 6.4, and Windows 2008\nR2. It may work on other debian, rhel, or windows platform families with or\nwithout modification.\n\nTesting for Ubuntu/CentOS can be done with Test Kitchen, see TESTING.md in this repository.\n\n# Usage\n\nSet the appropriate attributes and include the default recipe in a\nnode's run list. The URL to the package to install and its SHA256\nchecksum are required so the package may be retrieved. For example:\n\n    node.set['push_jobs']['package_url'] = \"http://www.example.com/pkgs/opscode-push-jobs-client_1.0.1-1.ubuntu.12.04_amd64.deb\"\n    node.set['push_jobs']['package_checksum'] = \"a-sha256-checksum\"\n\nIn order for the push jobs to be used, a whitelist of job names and\ntheir commands must be set in the configuration file. This is\nautomatically generated from the attribute\n`node['push_jobs']['whitelist']`. This attribute must be a Hash. For\nexample:\n\n    node.set['push_jobs']['whitelist'] = {\n      \"chef-client\" => \"chef-client\",\n      \"apt-get-update\" => \"apt-get update\"\n    }\n\nAs this is an attribute, interesting uses arise from orchestrating a\nChef Client run. Assuming the above is present on the node prior to\nrunning the recipe, run Chef Client with this command from the local\nworkstation:\n\n    knife job start chef-client A_NODE_NAME\n\nNew jobs can be added to the whitelist simply by creating attributes.\nThis can be done with `knife exec`:\n\n    knife exec -E 'nodes.transform(\"name:A_NODE_NAME\") do |n|\n      n.set[\"push_jobs\"][\"whitelist\"][\"ntpdate\"] = \"ntpdate -u time\"\n    end'\n\nThen, run the chef-client job, and then the ntpdate job:\n\n    knife job start chef-client A_NODE_NAME\n    knife job start ntpdate A_NODE_NAME\n\nIn a future release, an LWRP may be added to automatically add push\njobs.\n\n# Attributes\n\nAttributes are documented in metadata.rb. See `attributes/default.rb`\nfor default values.\n\n# Recipes\n\nThere are several recipes in this cookbook, so they can be used all\ntogether (include the `default` recipe), or as necessary.\n\n## default\n\nThe default recipe includes the appropriate recipe based on the node's\n`platform_family`. It will `raise` an error if:\n\n- The package URL and checksum attributes are not set.\n- The whitelist is not a Hash.\n- The node's platform is not supported.\n\n## config\n\nThis recipe ensures the platform-specific configuration directory\n(`/etc/chef`) is created, and renders the configuration file\n(`push-jobs-client.rb`) using the `whitelist` attribute.\n\nThe path to the configuration file is set using the `PushJobsHelper`\nmodule's `#config_path` method. This is done to ensure the correct\nfile path is used on Linux and Windows platforms, as it uses\n`Chef::Config`'s `#platform_specific_path` method.\n\n## linux\n\nThe `node['push_jobs']['package_url']` attribute must be set for this\nrecipe to download the Chef Push Jobs Client package from the URL.\n\n## knife\n\nIf the `node['push_jobs']['gem_url']` attribute is set, this\nrecipe will download the knife-pushy gem to the system.\n\nUse this recipe on workstation systems that should manage running jobs\nwith the knife plugin.\n\n## service\n\nThis recipe is responsible for handling the service resource based on\nthe node's platform. On Linux (Debian and RHEL families), it will\ncreate a `runit` service. The default logger is used, and the log will\nbe `/var/log/push-jobs-client/current`. On Windows, it will add a\nregistry key for the Push Jobs client, and manage the Windows service.\n\nThe service resources expect to be restarted if the configuration\ntemplate is changed, using `subscribes` notification.\n\n## windows\n\nThe `node['push_jobs']['package_url']` attribute must be set\nto use this recipe, as Windows does not have the concept of a package\nmanager with remote repositories. The URL will be used (with the\nchecksum attribute) to install the package using the `windows_package`\nresource from the `windows` cookbook.\n\n# Author & License\n\n* Author: Joshua Timberman (<joshua@getchef.com>)\n* Author: Charles Johnson (<charles@getchef.com>)\n* Author: Christopher Maier (<cm@getchef.com>)\n* Copyright: 2013-2014 Chef Software, Inc. (<legal@getchef.com>)\n\n```text\nLicensed under the Apache License, Version 2.0 (the \"License\");\nyou may not use this file except in compliance with the License.\nYou may obtain a copy of the License at\n\n   http://www.apache.org/licenses/LICENSE-2.0\n\nUnless required by applicable law or agreed to in writing, software\ndistributed under the License is distributed on an \"AS IS\" BASIS,\nWITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nSee the License for the specific language governing permissions and\nlimitations under the License.\n```\n",
+  "maintainer": "Chef Software, Inc.",
+  "maintainer_email": "cookbooks@getchef.com",
+  "license": "Apache 2.0",
+  "platforms": {
+    "ubuntu": ">= 0.0.0",
+    "centos": ">= 0.0.0",
+    "debian": ">= 0.0.0",
+    "windows": ">= 0.0.0"
+  },
+  "dependencies": {
+    "runit": ">= 0.0.0",
+    "windows": ">= 0.0.0"
+  },
+  "recommendations": {
+  },
+  "suggestions": {
+  },
+  "conflicting": {
+  },
+  "providing": {
+  },
+  "replacing": {
+  },
+  "attributes": {
+    "push_jobs/package_url": {
+      "description": "URL to a client package to download\n          for installing Chef Push Job Client",
+      "choice": [
+
+      ],
+      "calculated": false,
+      "type": "string",
+      "required": "optional",
+      "recipes": [
+
+      ]
+    },
+    "push_jobs/package_checksum": {
+      "description": "Checksum of the package file from package_url,\n          use this to prevent download every Chef run",
+      "choice": [
+
+      ],
+      "calculated": false,
+      "type": "string",
+      "required": "optional",
+      "recipes": [
+
+      ]
+    },
+    "push_jobs/gem_url": {
+      "description": "URL to the knife plugin gem file",
+      "choice": [
+
+      ],
+      "calculated": false,
+      "type": "string",
+      "required": "optional",
+      "recipes": [
+
+      ]
+    },
+    "push_jobs/gem_checksum": {
+      "description": "Checksum of the gem file from gem_url,\n          use this to prevent download every Chef run",
+      "choice": [
+
+      ],
+      "calculated": false,
+      "type": "string",
+      "required": "optional",
+      "recipes": [
+
+      ]
+    },
+    "push_jobs/whitelist": {
+      "description": "Hash of whitelist jobs for the push client configuration",
+      "choice": [
+
+      ],
+      "calculated": false,
+      "type": "string",
+      "required": "optional",
+      "recipes": [
+
+      ]
+    },
+    "push_jobs/service_string": {
+      "description": "String of the resource for the service, varies by platform.",
+      "choice": [
+
+      ],
+      "calculated": false,
+      "type": "string",
+      "required": "optional",
+      "recipes": [
+
+      ]
+    }
+  },
+  "groupings": {
+  },
+  "recipes": {
+  },
+  "version": "2.2.0"
+}
