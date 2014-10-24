@@ -11,10 +11,6 @@ package "httpd" do
   action :install
 end
 
-service "httpd" do
-  action [ :enable, :start ]
-end
-
 # Disable the default virtual host
 execute "mv /etc/httpd/conf.d/welcome.conf /etc/httpd/conf.d/welcome.conf.disabled" do 
   only_if do
@@ -54,4 +50,8 @@ node["apache"]["sites"].each do |site_name, site_data|
       :port => site_data["port"]
     )
   end
+end
+
+service "httpd" do
+  action [ :enable, :start ]
 end
