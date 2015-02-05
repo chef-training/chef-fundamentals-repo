@@ -1,4 +1,4 @@
-name "webserver"
+name "web"
 description "Web Server"
 run_list "role[base]", "recipe[apache]"
 default_attributes({
