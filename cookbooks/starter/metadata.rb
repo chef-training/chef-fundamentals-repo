@@ -1,3 +1,5 @@
 name 'starter'
 description 'A basic starter cookbook'
 version '1.0.0'
+maintainer 'Chef Software, Inc.'
+maintainer_email 'info@chef.io'
