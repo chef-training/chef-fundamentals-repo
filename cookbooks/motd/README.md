@@ -1,89 +1,68 @@
-# Description
+motd Cookbook
+=============
+TODO: Enter the cookbook description here.
 
-Installs message of the day (respects update-motd, if installed)
+e.g.
+This cookbook makes your favorite breakfast sandwich.
 
-# Recipes
+Requirements
+------------
+TODO: List your cookbook requirements. Be sure to include any requirements this cookbook has on platforms, libraries, other cookbooks, packages, operating systems, etc.
 
-## default
+e.g.
+#### packages
+- `toaster` - motd needs toaster to brown your bagel.
 
-The default recipe includes the cow and the knife\_status recipes
+Attributes
+----------
+TODO: List your cookbook attributes here.
 
-## cow
+e.g.
+#### motd::default
+<table>
+  <tr>
+    <th>Key</th>
+    <th>Type</th>
+    <th>Description</th>
+    <th>Default</th>
+  </tr>
+  <tr>
+    <td><tt>['motd']['bacon']</tt></td>
+    <td>Boolean</td>
+    <td>whether to include bacon</td>
+    <td><tt>true</tt></td>
+  </tr>
+</table>
 
-Displays a friendly warning-cow, logging onto a server in the production environment.
+Usage
+-----
+#### motd::default
+TODO: Write usage instructions for each cookbook.
 
-  This is example, a domain.com production server
+e.g.
+Just include `motd` in your node's `run_list`:
 
-  just in case you didn't notice the line above, maybe this cow helps:
-
-```
-   ___________________________________
-  < YOU ARE ON A PRODUCTION SERVER! >
-   -----------------------------------
-          \   ^__^
-           \  (oo)\_______
-              (__))\/\    \
-                  ||----w |
-                  ||     ||
-```
-
-## knife\_status
-
-plus a knife\_status line that displays the knife status of this node. (only when the node supports update-motd)
-
-```
-Last chef run: 10 minutes ago
-```
-
-# Attributes
-
-You can specify whether to use colors in your attributes (defaults to true)
-
-```ruby
-node['motd']['color'] = true
-```
-
-
-# Providers
-
-To use the provider in your cookbook, make sure you put the following line in your metadata.rb
-
-```ruby
-depends 'motd'
-```
-
-## default
-
-The name attribute is only used if update-motd is installed on the system.
-If not, it has no meaning.
-
-Create motd using the shipped cow template
-
-```ruby
-motd '50-mymotd'
+```json
+{
+  "name":"my_node",
+  "run_list": [
+    "recipe[motd]"
+  ]
+}
 ```
 
-Create a motd using a custom template
+Contributing
+------------
+TODO: (optional) If this is a public cookbook, detail the process for contributing. If this is a private cookbook, remove this section.
 
-```ruby
-motd '50-mymotd' do
-  cookbook 'my cookbook'
-  source   'test.erb'
-end
-```
+e.g.
+1. Fork the repository on Github
+2. Create a named feature branch (like `add_component_x`)
+3. Write your change
+4. Write tests for your change (if applicable)
+5. Run the tests, ensuring they all pass
+6. Submit a Pull Request using Github
 
-Use the default cow template, but do not use colors
-
-```ruby
-motd '50-mymotd' do
-  color false
-end
-```
-
-Remove a motd (if update-motd is used only)
-
-```ruby
-motd '50-mymotd' do
-  action :delete
-end
-```
+License and Authors
+-------------------
+Authors: TODO: List authors
