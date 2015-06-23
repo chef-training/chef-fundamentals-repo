@@ -2,7 +2,7 @@
 # Cookbook Name:: logrotate
 # Recipe:: default
 #
-# Copyright 2009-2013, Opscode, Inc.
+# Copyright 2009-2013, Chef Software, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,3 +18,18 @@
 #
 
 package 'logrotate'
+
+directory "/etc/logrotate.d" do
+  owner "root"
+  group "root"
+  mode "0755"
+  action :create
+end
+
+if platform? "solaris2" # ~FC023 style preference
+  cron "logrotate" do
+    minute "35"
+    hour "7"
+    command "/usr/sbin/logrotate /etc/logrotate.conf"
+  end
+end

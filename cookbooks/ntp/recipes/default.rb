@@ -18,9 +18,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+::Chef::Resource.send(:include, Opscode::Ntp::Helper)
+
 if platform_family?('windows')
   include_recipe 'ntp::windows_client'
 else
+
   node['ntp']['packages'].each do |ntppkg|
     package ntppkg
   end
@@ -37,6 +40,8 @@ else
     owner node['ntp']['conf_owner']
     group node['ntp']['conf_group']
     mode  '0644'
+    source 'ntp.leapseconds'
+    notifies :restart, "service[#{node['ntp']['service']}]"
   end
 
   include_recipe 'ntp::apparmor' if node['ntp']['apparmor_enabled']
@@ -49,7 +54,7 @@ unless node['ntp']['servers'].size > 0
     '2.pool.ntp.org',
     '3.pool.ntp.org'
   ]
-  log 'No NTP servers specified, using default ntp.org server pools'
+  Chef::Log.debug 'No NTP servers specified, using default ntp.org server pools'
 end
 
 if node['ntp']['listen'].nil? && !node['ntp']['listen_network'].nil?
@@ -68,12 +73,20 @@ if node['ntp']['listen'].nil? && !node['ntp']['listen_network'].nil?
   end
 end
 
+node.default['ntp']['tinker']['panic'] = 0 if node['virtualization'] &&
+                                              node['virtualization']['role'] == 'guest' &&
+                                              node['ntp']['disable_tinker_panic_on_virtualization_guest']
+
 template node['ntp']['conffile'] do
   source   'ntp.conf.erb'
   owner    node['ntp']['conf_owner']
   group    node['ntp']['conf_group']
   mode     '0644'
-  notifies :restart, "service[#{node['ntp']['service']}]"
+  notifies :restart, "service[#{node['ntp']['service']}]" unless node['ntp']['conf_restart_immediate']
+  notifies :restart, "service[#{node['ntp']['service']}]", :immediately if node['ntp']['conf_restart_immediate']
+  variables(
+    lazy { { :ntpd_supports_native_leapfiles => ntpd_supports_native_leapfiles } }
+  )
 end
 
 if node['ntp']['sync_clock']
@@ -90,11 +103,10 @@ if node['ntp']['sync_clock']
   end
 end
 
-if node['ntp']['sync_hw_clock'] && !platform_family?('windows')
-  execute 'Force sync hardware clock with system clock' do
-    command 'hwclock --systohc'
-    action :run
-  end
+execute 'Force sync hardware clock with system clock' do
+  command 'hwclock --systohc'
+  action :run
+  only_if { node['ntp']['sync_hw_clock'] && !platform_family?('windows') }
 end
 
 service node['ntp']['service'] do

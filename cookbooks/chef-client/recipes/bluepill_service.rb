@@ -5,9 +5,7 @@ end
 
 # libraries/helpers.rb method to DRY directory creation resources
 client_bin = find_chef_client
-log "Found chef-client in #{client_bin}" do
-  level :debug
-end
+Chef::Log.debug("Found chef-client in #{client_bin}")
 node.default['chef_client']['bin'] = client_bin
 create_directories
 
@@ -20,7 +18,7 @@ directory node['chef_client']['run_path'] do
   mode 0755
 end
 
-include_recipe 'bluepill'
+include_recipe 'bluepill' # ~FC007: bluepill is only required when using the bluepill_service recipe 
 
 template "#{node['bluepill']['conf_dir']}/chef-client.pill" do
   source 'chef-client.pill.erb'

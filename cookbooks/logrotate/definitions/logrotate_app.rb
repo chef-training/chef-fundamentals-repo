@@ -35,14 +35,29 @@ log_rotate_params = {
 define(:logrotate_app, log_rotate_params) do
   include_recipe 'logrotate::default'
 
-  acceptable_options = %w(missingok compress delaycompress dateext copytruncate notifempty delaycompress ifempty mailfirst nocompress nocopy nocopytruncate nocreate nodelaycompress nomail nomissingok noolddir nosharedscripts notifempty sharedscripts)
   options_tmp = params[:options] ||= %w(missingok compress delaycompress copytruncate notifempty)
   options = options_tmp.respond_to?(:each) ? options_tmp : options_tmp.split
+  options << 'sharedscripts' if params[:sharedscripts]
 
   if params[:enable]
-    invalid_options = options - acceptable_options
+    invalid_options = options - CookbookLogrotate::DIRECTIVES
+
     unless invalid_options.empty?
-      Chef::Application.fatal! "The passed value(s) [#{invalid_options.join(',')}] are not valid"
+      Chef::Log.error("Invalid option(s) passed to logrotate: #{invalid_options.join(', ')}")
+      raise
+    end
+
+    logrotate_config = {
+      :path => Array(params[:path]).map { |path| path.to_s.inspect }.join(' '),
+      :frequency => params[:frequency],
+      :options => options
+    }
+    CookbookLogrotate::VALUES.each do |opt_name|
+      logrotate_config[opt_name.to_sym] = params[opt_name.to_sym]
+    end
+
+    CookbookLogrotate::SCRIPTS.each do |script_name|
+      logrotate_config[script_name.to_sym] = Array(params[script_name.to_sym]).join("\n")
     end
 
     template "/etc/logrotate.d/#{params[:name]}" do
@@ -52,21 +67,7 @@ define(:logrotate_app, log_rotate_params) do
       owner    params[:template_owner]
       group    params[:template_group]
       backup   false
-      variables(
-        :path          => Array(params[:path]).map { |path| path.to_s.inspect }.join(' '),
-        :create        => params[:create],
-        :frequency     => params[:frequency],
-        :size          => params[:size],
-        :minsize       => params[:minsize],
-        :rotate        => params[:rotate],
-        :olddir        => params[:olddir],
-        :sharedscripts => params[:sharedscripts],
-        :postrotate    => Array(params[:postrotate]).join("\n"),
-        :prerotate     => Array(params[:prerotate]).join("\n"),
-        :firstaction   => Array(params[:firstaction]).join("\n"),
-        :lastaction    => Array(params[:lastaction]).join("\n"),
-        :options       => options
-      )
+      variables logrotate_config
     end
   else
     file "/etc/logrotate.d/#{params[:name]}" do

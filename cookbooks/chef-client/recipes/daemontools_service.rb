@@ -5,15 +5,13 @@ end
 
 # libraries/helpers.rb method to DRY directory creation resources
 client_bin = find_chef_client
-log "Found chef-client in #{client_bin}" do
-  level :debug
-end
+Chef::Log.debug("Found chef-client in #{client_bin}")
 node.default['chef_client']['bin'] = client_bin
 create_directories
 
 group = root_group
 
-include_recipe 'daemontools'
+include_recipe 'daemontools' # ~FC007: daemontools is only required when using the daemontools_service recipe 
 
 directory '/etc/sv/chef-client' do
   recursive true

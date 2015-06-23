@@ -1,0 +1,19 @@
+<% if @update_motd %>
+#!/bin/sh
+
+if [ -f <%= @timestamp_file %> ]; then
+  LAST_RUN=$(expr $(expr $(date +%s) - $(cat <%= @timestamp_file %>)) / 60)
+else
+  LAST_RUN="unknown"
+fi
+
+<% if @color %>
+if [ $LAST_RUN -le <%= @maxium_delay %> ]; then
+  echo "Last chef run: [0;32;49m$LAST_RUN minute(s)[0m ago"
+else
+  echo "Last chef run: [0;31;49m$LAST_RUN minute(s)[0m ago"
+fi
+<% else %>
+echo Last chef run: $LAST_RUN minute(s) ago
+<% end -%>
+<% end -%>
