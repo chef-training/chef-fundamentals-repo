@@ -1,0 +1,31 @@
+<% if @update_motd %>
+#!/bin/sh
+
+cat <<EOS
+<% end -%>
+
+<% if @color %>
+  This is [0;34;49m<%= @hostname %>[0m, a <%= @domain %> <%= @environment %> server
+<% else %>
+  This is <%= @hostname %>, a <%= @domain %> <%= @environment %> server
+<% end -%>
+<% if @environment == 'production' %>
+
+  just in case you didn't notice the line above, maybe this cow helps:
+
+   ___________________________________
+<% if @color %>
+  < [0;31;49mYOU ARE ON A PRODUCTION SERVER![0m >
+<% else %>
+   < YOU ARE ON A PRODUCTION SERVER! >
+<% end -%>
+   -----------------------------------
+          \   ^__^
+           \  (oo)\_______
+              (__))\/\    \\
+                  ||----w |
+                  ||     ||
+<% end -%>
+<% if @update_motd %>
+EOS
+<% end -%>

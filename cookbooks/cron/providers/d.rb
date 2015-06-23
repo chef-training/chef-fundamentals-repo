@@ -17,34 +17,43 @@
 # limitations under the License.
 #
 
+# This pattern is used to make the providers compatible with Chef 10,
+# which does not support use_inline_resources.
+#
+# FIXME: replace when Chef 12 is released.
+
 action :delete do
-  file "/etc/cron.d/#{new_resource.name}" do
+  f = file "/etc/cron.d/#{new_resource.name}" do
     action :delete
   end
+  new_resource.updated_by_last_action(f.updated_by_last_action?)
 end
 
 action :create do
+  if node['platform_family'] == 'solaris2'
+    fail 'Solaris does not support cron jobs in /etc/cron.d'
+  end
   t = template "/etc/cron.d/#{new_resource.name}" do
     cookbook new_resource.cookbook
-    source "cron.d.erb"
-    mode "0644"
-    variables({
-        :name => new_resource.name,
-
-        :minute => new_resource.minute,
-        :hour => new_resource.hour,
-        :day => new_resource.day,
-        :month => new_resource.month,
-        :weekday => new_resource.weekday,
-
-        :command => new_resource.command,
-        :user => new_resource.user,
-
-        :mailto => new_resource.mailto,
-        :path => new_resource.path,
-        :home => new_resource.home,
-        :shell => new_resource.shell
-      })
+    source 'cron.d.erb'
+    mode new_resource.mode
+    variables(
+                :name => new_resource.name,
+                :predefined_value => new_resource.predefined_value,
+                :minute => new_resource.minute,
+                :hour => new_resource.hour,
+                :day => new_resource.day,
+                :month => new_resource.month,
+                :weekday => new_resource.weekday,
+                :command => new_resource.command,
+                :user => new_resource.user,
+                :mailto => new_resource.mailto,
+                :path => new_resource.path,
+                :home => new_resource.home,
+                :shell => new_resource.shell,
+                :comment => new_resource.comment,
+                :environment => new_resource.environment
+      )
     action :create
   end
   new_resource.updated_by_last_action(t.updated_by_last_action?)

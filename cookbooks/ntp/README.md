@@ -1,6 +1,6 @@
 NTP Cookbook
 ============
-[![Build Status](https://secure.travis-ci.org/opscode-cookbooks/ntp.png?branch=master)](http://travis-ci.org/opscode-cookbooks/ntp)
+[![Build Status](https://secure.travis-ci.org/gmiranda23/ntp.png?branch=master)](http://travis-ci.org/gmiranda23/ntp)
 
 Installs and configures ntp. On Windows systems it uses the Meinberg port of the standard NTPd client to Windows.
 
@@ -16,11 +16,12 @@ Requirements
 ### Supported Operating Systems
 - Debian-family Linux Distributions
 - RedHat-family Linux Distributions
+- Gentoo Linux
 - FreeBSD
 - Windows
 
 ### Cookbooks
-- When running on Windows based systems, the node must include the Windows cookbook. This cookbook suggests the Windows cookbook in the metadata so as to not force inclusion of the Windows cookbook on *nix systems. Change 'suggests' to 'depends' if you require Windows platform support.
+- When running on Windows based systems, the node must include the Windows cookbook. This cookbook suggests the Windows cookbook in the metadata so as to not force inclusion of the Windows cookbook on \*nix systems. Change 'suggests' to 'depends' if you require Windows platform support.
 
 Attributes
 ----------
@@ -41,14 +42,73 @@ Attributes
   - Boolean. Defaults to false. Forces the ntp daemon to be halted, an ntp -q command to be issued, and the ntp daemon to be restarted again on every Chef-client run. Will have no effect if drift is over 1000 seconds.
 
 * `ntp['sync_hw_clock']` (applies to NTP Servers and Clients)
-  - Boolean. Defaults to false. On *nix-based systems, forces the 'hwclock --systohc' command to be issued on every Chef-client run. This will sync the hardware clock to the system clock.
+  - Boolean. Defaults to false. On \*nix-based systems, forces the 'hwclock --systohc' command to be issued on every Chef-client run. This will sync the hardware clock to the system clock.
   - Not available on Windows.
+
+* `ntp['restrict_default']`
+  - String. Defaults to 'kod notrap nomodify nopeer noquery'. Set to 'ignore' to [further lock down access](http://support.ntp.org/bin/view/Support/AccessRestrictions#Section_6.5.1.1.2.).
 
 * `ntp["listen_network"]` / `ntp["listen"]`
   - String, optional attribute. Default is for NTP to listen on all addresses.
   - `ntp["listen_network"]` should be set to 'primary' to listen on the node's primary IP address as determined by ohai, or set to a CIDR (eg: '192.168.4.0/24') to listen on the last node address on that CIDR.
   - `ntp["listen"]` can be set to a specific address (eg: '192.168.4.10') instead of `ntp["listen_network"]` to force listening on a specific address.
   - If both `ntp["listen"]` and `ntp["listen_network"]` are set then `ntp["listen"]` will always win.
+
+* `ntp["statistics"]`
+ - Boolean. Default to true. Enable/disable statistics data logging into
+   `ntp['statsdir']`.
+ - Not available on Windows.
+
+* `ntp['conf_restart_immediate']`
+  - Boolean. Defaults to false. Restarts NTP service immediately after a config update if true.  Otherwise it is a delayed restart.
+
+* `ntp['peer']['disable_tinker_panic_on_virtualization_guest']` (applies to virtualized hosts only)
+  - Boolean. Defaults to true. Sets tinker panic to 0.  NTP default it 1000.  (See http://www.vmware.com/vmtn/resources/238 p. 23 for explanation on disabling panic) (Note: this overrides `ntp['tinker']['panic']` attribute)
+
+* `ntp['peer']['use_iburst']` (applies to NTP Servers ONLY)
+  - Boolean. Defaults to true. Enables iburst in peer declaration.
+
+* `ntp['peer']['use_burst']` (applies to NTP Servers ONLY)
+  - Boolean. Defaults to false. Enables burst in peer declaration.
+
+* `ntp['peer']['minpoll']` (applies to NTP Servers ONLY)
+  - Boolean. Defaults to 6 (ntp default). Specify the minimum poll intervals for NTP messages, in seconds to the power of two.
+
+* `ntp['peer']['maxpoll']` (applies to NTP Servers ONLY)
+  - Boolean. Defaults to 10 (ntp default). Specify the maximum poll intervals for NTP messages, in seconds to the power of two.
+
+* `ntp['server']['prefer']` (applies to NTP Servers and Clients)
+  - String. Defaults to emtpy string. The server from `ntp['servers']` to prefer getting the time from.
+
+* `ntp['server']['use_iburst']` (applies to NTP Servers and Clients)
+  - Boolean. Defaults to true. Enables iburst in server declaration.
+
+* `ntp['server']['use_burst']` (applies to NTP Servers and Clients)
+  - Boolean. Defaults to false. Enables burst in server declaration.
+
+* `ntp['server']['minpoll']` (applies to NTP Servers and Clients)
+  - Boolean. Defaults to 6 (ntp default). Specify the minimum poll intervals for NTP messages, in seconds to the power of two.
+
+* `ntp['server']['maxpoll']` (applies to NTP Servers and Clients)
+  - Boolean. Defaults to 10 (ntp default). Specify the maximum poll intervals for NTP messages, in seconds to the power of two.
+
+* `ntp['tinker']['allan']`
+  - Number. Defaults to 1500 (ntp default). Spedifies the Allan intercept, which is a parameter of the PLL/FLL clock discipline algorithm, in seconds.
+
+* `ntp['tinker']['dispersion']`
+  - Number. Defaults to 15 (ntp default). Specifies the dispersion increase rate in parts-per-million (PPM).
+
+* `ntp['tinker']['panic']`
+  - Number. Defaults to 1000 (ntp default). Spedifies the panic threshold in seconds. If set to zero, the panic sanity check is disabled and a clock offset of any value will be accepted.
+
+* `ntp['tinker']['step']`
+  - Number. Defaults to 0.128 (ntp default). Spedifies the step threshold in seconds. If set to zero, step adjustments will never occur. Note: The kernel time discipline is disabled if the step threshold is set to zero or greater than 0.5 s.
+
+* `ntp['tinker']['stepout']`
+  - Number. Defaults to 900 (ntp default). Specifies the stepout threshold in seconds. If set to zero, popcorn spikes will not be suppressed.
+
+* `ntp['localhost']['noquery']` (applies to NTP Servers and Clients)
+  - Boolean. Defaults to false. Set to true if using ntp < 4.2.8 or any unpatched ntp version to mitigate CVE-2014-9293 / CVE-2014-9294 / CVE-2014-9295
 
 ### Platform specific
 
@@ -105,7 +165,7 @@ Attributes
   - Default, "Microsoft Visual C++ 2008 Redistributable - x86 9.0.21022"
   - Windows platform only
 
-* ntp['sync_hw_clock']
+* `ntp['sync_hw_clock']`
   - Boolean, determines if the ntpdate command is issued to sync the hardware clock
   - Default, false
   - Not applicable for Windows nodes
@@ -115,6 +175,10 @@ Attributes
   - Defaults to false and will make no provisions for apparmor.  If a
     platform is apparmor enabled by default, (currently Ubuntu)
     default will be true.
+
+* `ntp['use_cmos']`
+  - Boolean, uses a high stratum undisciplined clock for machines with real CMOS clock.
+  - Defaults to true unless a platform appears to be virtualized according to Ohai.
 
 
 Usage
@@ -140,7 +204,6 @@ name 'ntp_server'
 description 'Role applied to the system that should be an NTP server.'
 default_attributes(
   'ntp' => {
-    'is_server'    => 'true',
     'servers'      => ['0.pool.ntp.org', '1.pool.ntp.org'],
     'peers'        => ['time0.int.example.org', 'time1.int.example.org'],
     'restrictions' => ['10.0.0.0 mask 255.0.0.0 nomodify notrap']
@@ -156,7 +219,7 @@ If for some reason you need to stop and remove the ntp daemon, you can apply thi
 
 ### windows_client recipe
 
-Windows only. Apply on a Windows host to install the Meinberg NTPd client. 
+Windows only. Apply on a Windows host to install the Meinberg NTPd client.
 
 
 Development
@@ -178,10 +241,8 @@ This section details "quick development" steps. For a detailed explanation, see 
 4. **Write tests**
 5. Make your changes/patches/fixes, committing appropriately
 6. Run the tests:
-    - `bundle exec foodcritic -f any .`
-    - `bundle exec rspec`
-    - `bundle exec rubocop`
-    - `bundle exec kitchen test`
+    - `bundle exec rake`
+    - `bundle exec rake kitchen`
 
   In detail:
     - Foodcritic will catch any Chef-specific style errors

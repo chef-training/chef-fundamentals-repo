@@ -2,7 +2,7 @@
 # Cookbook Name:: logrotate
 # Library:: CookbookLogrotate
 #
-# Copyright 2013, Opscode
+# Copyright 2013, Chef
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,26 +17,22 @@
 # limitations under the License.
 #
 
+# Helper module for Logrotate configuration module CookbookLogrotate
 module CookbookLogrotate
-  DIRECTIVES = %w[
-    compress        copy        copytruncate    daily           dateext
-    delaycompress   ifempty     mailfirst       maillast        missingok
-    monthly         nocompress  nocopy          nocopytruncate  nocreate
-    nodelaycompress nodateext   nomail          nomissingok     noolddir
-    nosharedscripts noshred     notifempty      sharedscripts   shred
-    weekly          yearly
-  ]
+  DIRECTIVES = %w(compress copy copytruncate daily dateext
+    dateyesterday delaycompress hourly ifempty mailfirst maillast
+    missingok monthly nocompress nocopy nocopytruncate nocreate
+    nodelaycompress nodateext nomail nomissingok noolddir
+    nosharedscripts noshred notifempty sharedscripts shred weekly
+    yearly) unless const_defined?(:DIRECTIVES)
 
-  VALUES = %w[
-    compresscmd    uncompresscmd  compressext    compressoptions
-    create         dateformat     include        mail
-    maxage         minsize        rotate         size
-    shredcycles    start          tabooext
-  ]
+  VALUES = %w(compresscmd uncompresscmd compressext compressoptions
+    create dateformat include mail extension maxage minsize maxsize
+    rotate size shredcycles start tabooext su olddir) unless const_defined?(:VALUES)
 
-  SCRIPTS = %w[firstaction  prerotate  postrotate  lastaction]
+  SCRIPTS = %w(firstaction prerotate postrotate lastaction preremove) unless const_defined?(:SCRIPTS)
 
-  DIRECTIVES_AND_VALUES = DIRECTIVES + VALUES
+  DIRECTIVES_AND_VALUES = DIRECTIVES + VALUES unless const_defined?(:DIRECTIVES_AND_VALUES)
 
   # Helper class for creating configurations
   class LogrotateConfiguration
@@ -83,10 +79,10 @@ module CookbookLogrotate
 
     private
 
-      def initialize(hash)
-        @directives = LogrotateConfiguration.directives_from(hash)
-        @values = LogrotateConfiguration.values_from(hash)
-        @paths = LogrotateConfiguration.paths_from(hash)
-      end
+    def initialize(hash)
+      @directives = LogrotateConfiguration.directives_from(hash)
+      @values = LogrotateConfiguration.values_from(hash)
+      @paths = LogrotateConfiguration.paths_from(hash)
+    end
   end
 end
